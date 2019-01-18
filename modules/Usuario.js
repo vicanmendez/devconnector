@@ -19,8 +19,8 @@ const UserSchema = new Schema({
   },
   avatar: {
     //Utilizamos String para el avatar para que se guarde la URL del servidor de Gravatar
-    type: String,
-    required: true
+    type: String
+    //required: true
   },
   fecha: {
     type: Date,
@@ -28,4 +28,5 @@ const UserSchema = new Schema({
   }
 });
 
+//Exportamos el modelo de creación del Schema para usuario
 module.exports = Usuario = mongoose.model("usuario", UserSchema);

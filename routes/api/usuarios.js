@@ -2,30 +2,43 @@ const express = require("express");
 const router = express.Router();
 //Cargamos el módulo de Usuario
 const Usuario = require("../../modules/Usuario");
-
+const gravatar = require("gravatar");
+const bcrypt = require("bcryptjs");
 // @route GET api/usuarios/test
 // @descr Testear la ruta de usuarios
 // @access Public
 router.get("/test", (req, res) => res.json({ msg: "Usuarios funcionando" }));
 
-// @route GET api/usuarios/register
+// @route POST api/usuarios/register
 // @descr Ruta para registrar usuarios
 // @access Public
 router.post("/register", (req, res) => {
-  //Primero verificamos que el email no exista previamente
-  Usuario.findOne({ email: req.body.email }).then(user => {
-    if (user) {
-      //Si hay un usuario con ese email retornamos error 400
-      return res.status(400).json({ email: "Ya existe ese Email registrado" });
-    } else {
-      //Si no existe el usuario, lo creamos
-      const newUser = new Usuario({
-        nombre: req.body.nombre,
-        email: req.body.email,
-        avatar: req.body.avatar,
-        clave: req.body.clave
+  if (!req.body) {
+    console.log("No estan llegando los datos por POST");
+  } else {
+    //Verificamos si el usuario ya existe
+    Usuario.findOne({ email: req.body.email }, (err, foundUser) => {
+      //Si hubo un error, lo enviamos como response
+      if (err) return res.status(400).json({ Error: err });
+      //Si ya existe el usuario, también enviamos el mensaje correspondiente con error 400
+      if (foundUser)
+        return res
+          .status(400)
+          .json({ Error: "Ya existe ese correo registrado" });
+      //Si no hubo problemas
+      const { nombre, email, clave, avatar } = req.body;
+      bcrypt.hash(clave, 10, (err, hash) => {
+        //El método create se encarga de guardar los objetos en la BD
+        Usuario.create(
+          { nombre, email, clave: hash, avatar },
+          (err, newUser) => {
+            if (err) console.log(err);
+            else res.json(newUser);
+          }
+        );
       });
-    }
-  });
+    });
+  } //endif
 });
+
 module.exports = router;

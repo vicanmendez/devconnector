@@ -22,6 +22,10 @@ mongoose
 
 app.get("/", (req, res) => res.send("Hola mundo desde el servidor node.js"));
 
+//Body parser middleware
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
+
 //Asociar rutas a determinadas URL
 app.use("/api/usuarios", usuarios);
 app.use("/api/perfil", perfil);
